@@ -53,8 +53,18 @@ app.get("/urls/new", (req, res) => {
 // post request for urls_new.ejs form submission
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  // console.log(req.body);
+  const newShortURL = generateRandomString();
+  console.log(newShortURL);
+
+  // adding newshortURL-longURL key-value pair to the urlDatabase
+  urlDatabase[newShortURL] = req.body.longURL;
+  console.log(urlDatabase);
+  res.redirect(`/urls/${newShortURL}`);
+
+  console.log("database: ", urlDatabase);
+
+
 });
 
 // route for urls_show
@@ -63,6 +73,15 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 
 });
+
+// route to redirect short URLs to their coresponding long URLs
+
+app.get("/u/:shortURL", (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  console.log(longURL);
+  res.redirect(longURL);
+});
+
 
 
 
@@ -81,8 +100,8 @@ function generateRandomString() {
   for (let i = 0; i < 6; i++) {
     string += characters.charAt(Math.floor(Math.random() * characters.length));
   }
-  console.log(string);
+  // console.log(string);
   return string;
 };
 
-let randomString = generateRandomString();
+//let randomString = generateRandomString();
