@@ -40,13 +40,19 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+// route for rendering urls_new.ejs (form) template
+
+app.get("/urls/new", (req, res) => {
+  res.render("urls_new");
+});
+
+
 // route for urls_show
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
   res.render("urls_show", templateVars);
 
 });
-
 
 
 
