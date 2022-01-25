@@ -5,7 +5,11 @@ const PORT = 8080;
 // setting EJS as the template engine
 app.set("view engine", "ejs");
 
-
+// adding body parser library
+// converts the request body from a Buffer into string
+// then adds the data to the req(request) object under the key body (store it in body)
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended: true}));
 
 //URLs Database Object
 
@@ -46,6 +50,12 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// post request for urls_new.ejs form submission
+
+app.post("/urls", (req, res) => {
+  console.log(req.body);  // Log the POST request body to the console
+  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+});
 
 // route for urls_show
 app.get("/urls/:shortURL", (req, res) => {
@@ -62,3 +72,17 @@ app.listen(PORT, () => {
 
 
 
+// FUNCTIONS
+
+function generateRandomString() {
+  let string = '';
+  let characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
+  for (let i = 0; i < 6; i++) {
+    string += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  console.log(string);
+  return string;
+};
+
+let randomString = generateRandomString();
