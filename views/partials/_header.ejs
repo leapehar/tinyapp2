@@ -11,10 +11,19 @@
       </div>
     </div>
     <div class="d-flex" >
-      <form method="POST" action="/login">
-          <input type="text" name="username">
-          <button class="btn btn-outline-dark" type="submit">Sign In</button>
+      <% if(username) { %>
+        <a class="nav-link disabled">Logged In As <%= username %> ! </a>
+        <form method="POST" action="/logout">
+          <!-- <input type="text" name="username"> -->
+          <button class="btn btn-outline-dark" type="submit">Log Out</button>
       </form>
+   <%   } else { %>
+    <form method="POST" action="/login">
+        <input type="text" name="username" placeholder="Username">
+        <button class="btn btn-outline-dark" type="submit">Sign In</button>
+    </form>
+
+    <%  }%>
 
     </div>
   </nav>

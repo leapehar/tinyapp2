@@ -47,7 +47,7 @@ app.get("/hello", (req, res) => {
 // route to /urls
 app.get("/urls", (req, res) => {
   // creating templateVars object to store urlDatabase, to then be passed into urls_index
-  const templateVars = {urls: urlDatabase};
+  const templateVars = {username: req.cookies["username"], urls: urlDatabase};
   //passing templateVars into urls_index to populate the template
   res.render("urls_index", templateVars);
 });
@@ -55,7 +55,8 @@ app.get("/urls", (req, res) => {
 // route for rendering urls_new.ejs (form) template
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const templateVars = {username: req.cookies["username"]};
+  res.render("urls_new", templateVars);
 });
 
 // post request for urls_new.ejs form submission
@@ -77,7 +78,7 @@ app.post("/urls", (req, res) => {
 
 // route for urls_show
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
+  const templateVars = {username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]};
   res.render("urls_show", templateVars);
 
 });
@@ -116,6 +117,18 @@ app.post("/login", (req, res) => {
   const value = req.body.username;
   console.log(value);
   res.cookie("username", value);
+
+  res.redirect("/urls");
+});
+
+
+// logout 
+// clears the username cookie
+// redirects the user back to the /urls
+
+app.post("/logout", (req, res) => {
+
+  res.clearCookie("username");
   res.redirect("/urls");
 });
 
