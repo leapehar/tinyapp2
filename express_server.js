@@ -11,6 +11,14 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+// requiring cookie parser 
+// helps us read the values from cookies
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
+
+
+
+
 //URLs Database Object
 
 const urlDatabase = {
