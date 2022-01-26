@@ -107,7 +107,17 @@ app.post("/urls/:shortURL/update", (req, res) => {
   res.redirect("/urls");
 });
 
+// Login Route
+// sets cookie names username to value submitted in the request body via the login form.
+//redirects to /urls
 
+app.post("/login", (req, res) => {
+
+  const value = req.body.username;
+  console.log(value);
+  res.cookie("username", value);
+  res.redirect("/urls");
+});
 
 
 app.listen(PORT, () => {
