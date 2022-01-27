@@ -220,10 +220,25 @@ app.post("/urls/:shortURL/update", (req, res) => {
 // sets cookie names username to value submitted in the request body via the login form.
 //redirects to /urls
 
+// const users = {
+//   "userRandomID": {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "purple-monkey-dinosaur"
+//   },
+//   "user2RandomID": {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "dishwasher-funk"
+//   }
+// };
+
+
 app.post("/login", (req, res) => {
 
   const value = req.body.email;
   const user = findUserByEmail(value);
+  console.log("USER:", user, user.password);
   const password = req.body.password;
 
 
@@ -233,12 +248,25 @@ app.post("/login", (req, res) => {
   }
 
   // if the user is located in the database but the password is wrong (ie not in the database)
-  if (user && password !== user.password) {
+
+  console.log("TEST:", password, user.password)
+  if (user && bcrypt.compareSync(password, user.password) === false) {
     return res.status(403).send("wrong password");
   }
 
+
+  // if (user && password !== user.password) {
+  //   return res.status(403).send("wrong password");
+  // }
+
   //if the user is located in the database and the password matches that user
-  if (user && password === user.password) {
+
+
+  // if (user && password === user.password) {
+  //   res.cookie("user", user.id);
+  //   res.redirect("/urls");
+
+  if (user && bcrypt.compareSync(password, user.password) === true) {
     res.cookie("user", user.id);
     res.redirect("/urls");
   }
