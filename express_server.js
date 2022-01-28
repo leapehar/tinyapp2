@@ -13,9 +13,21 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 // requiring cookie parser 
 // helps us read the values from cookies
-const cookieParser = require('cookie-parser');
-const {redirect} = require("express/lib/response");
-app.use(cookieParser())
+
+// const cookieParser = require('cookie-parser');
+// const {redirect} = require("express/lib/response");
+// app.use(cookieParser())
+
+
+// requiring cookie session
+const cookieSession = require('cookie-session');
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ["tiny app secret key"],
+
+  maxAge: 24 * 60 * 60 * 1000
+}))
 
 // requiring bcrypt
 const bcrypt = require('bcryptjs');
@@ -33,7 +45,7 @@ const urlDatabase = {
     userID: "aJ48lW"
   }
 };
-
+// longurl.longurl
 //
 
 // Users Database Object
@@ -42,12 +54,13 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("abc", 10)
+
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("123", 10)
   }
 };
 
@@ -71,16 +84,18 @@ app.get("/hello", (req, res) => {
 
 // route to /urls
 app.get("/urls", (req, res) => {
-  const loggedInUserURLs = urlsForUser(req.cookies.user, urlDatabase);
+  const loggedInUserURLs = urlsForUser(req.session.user, urlDatabase);
 
   // creating templateVars object to store urlDatabase, to then be passed into urls_index
 
-  console.log(req.cookies);
-  console.log(req.cookies.user);
-  const userIdfromCookie = req.cookies.user;
+  console.log(req.session);
+  console.log(req.session.user);
+  const userIdfromCookie = req.session.user;
 
 
   const result = findUserByUser_ID(userIdfromCookie);
+  console.log("uesr:", result);
+  console.log("user data:", users)
 
   const templateVars = {urls: loggedInUserURLs, user: result};
 
@@ -94,11 +109,11 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
 
   // if user is not logged in when trying to access create new url page, redirect them to the login page
-  if (!req.cookies.user) {
+  if (!req.session.user) {
     res.redirect("/login")
   }
 
-  const userIdfromCookie = req.cookies.user;
+  const userIdfromCookie = req.session.user;
   const result = findUserByUser_ID(userIdfromCookie);
 
   const templateVars = {urls: urlDatabase, user: result};
@@ -114,7 +129,7 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
 
-  if (!req.cookies.user) {
+  if (!req.session.user) {
     res.status(400).send("you are not authorized for this action")
   }
   // console.log(req.body);
@@ -124,7 +139,7 @@ app.post("/urls", (req, res) => {
   // adding newshortURL-longURL key-value pair to the urlDatabase
   urlDatabase[newShortURL] = {
     longURL: req.body.longURL,
-    userID: req.cookies.user
+    userID: req.session.user
   };
 
   console.log(urlDatabase);
@@ -138,7 +153,7 @@ app.post("/urls", (req, res) => {
 // route for urls_show
 app.get("/urls/:shortURL", (req, res) => {
 
-  const userIdfromCookie = req.cookies.user;
+  const userIdfromCookie = req.session.user;
   const result = findUserByUser_ID(userIdfromCookie);
   // const templateVars = {urls: urlDatabase, user: result};
   console.log(urlDatabase[req.params.shortURL]);
@@ -150,16 +165,19 @@ app.get("/urls/:shortURL", (req, res) => {
 // route to redirect short URLs to their coresponding long URLs
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
-  console.log(longURL);
-  res.redirect(longURL);
+  const longURLdata = urlDatabase[req.params.shortURL];
+  // console.log(longURLdata);
+  // console.log(urlDatabase);
+  res.redirect(longURLdata.longURL);
+
+
 });
 
 // deleting URL from urlDatabase
 // redirecting to /urls
 app.post("/urls/:shortURL/delete", (req, res) => {
 
-  if (!req.cookies.user) {
+  if (!req.session.user) {
     res.status(400).send("you cant delete this url");
   };
 
@@ -195,7 +213,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 // Updating URLs
 
 app.post("/urls/:shortURL/update", (req, res) => {
-  if (!req.cookies.user) {
+  if (!req.session.user) {
     res.status(400).send("you cant edit this url");
   };
 
@@ -238,7 +256,7 @@ app.post("/login", (req, res) => {
 
   const value = req.body.email;
   const user = findUserByEmail(value);
-  console.log("USER:", user, user.password);
+  console.log("USER:", user);
   const password = req.body.password;
 
 
@@ -267,7 +285,8 @@ app.post("/login", (req, res) => {
   //   res.redirect("/urls");
 
   if (user && bcrypt.compareSync(password, user.password) === true) {
-    res.cookie("user", user.id);
+    req.session.user = user.id;
+    // res.cookie("user", user.id);
     res.redirect("/urls");
   }
 
@@ -280,7 +299,8 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
 
-  res.clearCookie("user");
+  req.session = null;
+  // res.clearCookie("user");
   res.redirect("/urls");
 });
 
@@ -325,7 +345,8 @@ app.post("/register", (req, res) => {
   }
   console.log(users);
 
-  res.cookie("user", newUser.id);
+  req.session.user = newUser.id;
+  // res.cookie("user", newUser.id);
 
   res.redirect("/urls");
 });
@@ -334,7 +355,7 @@ app.post("/register", (req, res) => {
 // login form endpoint
 
 app.get("/login", (req, res) => {
-  const userIdfromCookie = req.cookies.user;
+  const userIdfromCookie = req.session.user;
   const result = findUserByUser_ID(userIdfromCookie);
 
   const templateVars = {urls: urlDatabase, user: result};
