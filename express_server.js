@@ -255,7 +255,7 @@ app.post("/urls/:shortURL/update", (req, res) => {
 app.post("/login", (req, res) => {
 
   const value = req.body.email;
-  const user = findUserByEmail(value);
+  const user = findUserByEmail(value, users);
   console.log("USER:", user);
   const password = req.body.password;
 
@@ -333,7 +333,7 @@ app.post("/register", (req, res) => {
     return res.status(400).send("email and password cannot be blank");
   }
 
-  if (findUserByEmail(userEmail)) {
+  if (findUserByEmail(userEmail, users)) {
     return res.status(400).send("email is already registered");
   };
 
@@ -406,10 +406,10 @@ function findUserByUser_ID(user_id) {
 
 // function to search for email in users database
 
-function findUserByEmail(email) {
-  for (const user in users) {
-    if (users[user].email === email) {
-      return users[user];
+function findUserByEmail(email, database) {
+  for (const user in database) {
+    if (database[user].email === email) {
+      return database[user];
     }
   }
 }
