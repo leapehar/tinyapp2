@@ -1,3 +1,6 @@
+const {findUserByEmail} = require('./helpers.js');
+
+
 const express = require("express");
 const app = express();
 const PORT = 8080;
@@ -404,15 +407,7 @@ function findUserByUser_ID(user_id) {
 }
 
 
-// function to search for email in users database
 
-function findUserByEmail(email, database) {
-  for (const user in database) {
-    if (database[user].email === email) {
-      return database[user];
-    }
-  }
-}
 
 
 function urlsForUser(userId, urlDatabase) {
