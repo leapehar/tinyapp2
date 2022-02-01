@@ -104,6 +104,10 @@ app.post("/urls", (req, res) => {
 // route for urls_show
 app.get("/urls/:shortURL", (req, res) => {
 
+  if (!req.session.user) {
+    res.status(400).send("you are not authorized for this action. Please log in!");
+  }
+
   const userIdfromCookie = req.session.user;
   const result = findUserByUser_ID(userIdfromCookie);
   const templateVars = {user: result, shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL};
